@@ -1,0 +1,4 @@
+side-projects
+=============
+
+Personal projects

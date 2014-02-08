@@ -63,7 +63,7 @@ if re.search("[*/+-][*/+]", f_str):
 
 # Convert f_str into python-readable format
 f_str = f_str.replace("^", "**")       # Replace ^ with **
-def repl(m): return m.group(1)+"*x"    # Add * before x in f_str if needed
+def repl(m): return m.group(1)+"*x"    # A not-so-anonymous lambda for doing:
 f_str = re.sub(r"([\dx])x",repl,f_str) # Add * before x if needed, continued
 
 # Convert f_str into the actual function f(x)

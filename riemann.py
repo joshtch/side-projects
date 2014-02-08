@@ -15,8 +15,7 @@ import math
 def riemann(f, a, b, n):
     if a == b: print "All Riemann sums equal zero because a = b."; return
 
-    Dx = float(b-a)/n
-    print Dx
+    Dx = (b-a)/n
     # Left Riemann = [f(a) + f(a+Dx) + f(a+2Dx) + ... + f(b-Dx)]*Dx
     print "Left Riemann:   %.2f" % (sigma(a,Dx,b-Dx,f)*Dx)
 
@@ -68,7 +67,7 @@ def repl(m): return m.group(1)+"*x"    # Add * before x in f_str if needed
 f_str = re.sub(r"([\dx])x",repl,f_str) # Add * before x if needed, continued
 
 # Convert f_str into the actual function f(x)
-def f(x): return eval(f_str.replace("x","(%d)"%x))
+def f(x): return eval(f_str.replace("x","(%f)"%x))
 
 # Finish checking for invalid input via edge cases
 try:
@@ -87,7 +86,7 @@ except SyntaxError:
     print "Error: Not a number."
     exit()
 
-if n <= 0:
+if n <= 0 and a != b:
     print "Error: n must be greater than 0."
     exit()
 

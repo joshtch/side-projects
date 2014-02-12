@@ -5,61 +5,76 @@ typedef void* Value;
 #define CMP_PROTOTYPE(NAME) int (*NAME)(const void*, const void*)
 
 static void private_qsort(void* arr, size_t size, CMP_PROTOTYPE(cmp),
-            Index left, Index right, Index pivot);
-static Index choose_pivot(void* arr, size_t length, size_t size,
+            Index left, Index right);
+static Index choose_pivot(void* arr, size_t size, Index left, Index right,
             CMP_PROTOTYPE(cmp));
 
 void qsort(void* arr, size_t length, size_t size, CMP_PROTOTYPE(cmp))
 {
     if (length > 1) {
-        Index pivot = choose_pivot(arr, length, size, cmp);
-        return private_qsort(arr, size, cmp, 0, length - 1, pivot);
+        return private_qsort(arr, size, cmp, 0, length - 1);
     }
 }
+
 
 /* ------------------------------ Sorting ---------------------------------- */
 
 static void swap(void* arr, size_t size, Index first, Index second);
 
-static void private_qsort(void* arr, size_t size, CMP_PROTOTYPE(cmp),
-            Index left, Index right, Index pivot)
-{
-}
+static Index iterate_left_marker(void* arr, size_t size, CMP_PROTOTYPE(cmp),
+        Index left, Value pivot_val, Index limit);
+static Index iterate_right_marker(void* arr, size_t size, CMP_PROTOTYPE(cmp),
+        Index right, Value pivot_val, Index limit);
 
-static void segment_reorder(void* arr, size_t size, CMP_PROTOTYPE(cmp),
-        Index left, Index right, Index pivot)
+static void private_qsort(void* arr, size_t size, CMP_PROTOTYPE(cmp),
+        Index left, Index right)
 {
 #define VALUE(INDEX) ((char*)(arr) + (INDEX)*(size))
     Index i = left;
     Index j = right;
+    Index k, left_of_pivot_max, right_of_pivot_min;
+    int comparison;
+    Index pivot = choose_pivot(arr, size, left, right, cmp);
     Value pivot_val = VALUE(pivot);
-    int j_vs_pivot;
-    Value i_val, j_val;
 
     i = iterate_left_marker(arr, size, cmp, i, pivot_val, j);
+    j = iterate_right_marker(arr, size, cmp, j, pivot_val, i);
+    k = i;
     while (i < j) {
-        i = iterate_left_marker(arr, size, cmp, i, pivot_val, j);
-        i_val = VALUE(i);
-        if (cmp(i_val, pivot_val) >= 0) {
-            j_vs_pivot = cmp(VALUE(j), pivot_val);
-            while (j_vs_pivot >= 0) {
-                --j;
-                j_vs_pivot = cmp(VALUE(j), pivot_val);
-            }
-            if (i_val != VALUE(j))
-                swap(arr, size, i, j);
+        left_of_pivot_max = i;
+        right_of_pivot_min = j;
+        while ((comparison = cmp(VALUE(k), pivot_val)) == 0 && k != j) {
+            ++k;
         }
-        ++i;
+        if (k == j) break;
+        if (comparison < 0) {
+            swap(arr, size, k, i);
+            i = iterate_left_marker(arr, size, cmp, i, pivot_val, j);
+        } else if (comparison > 0) {
+            swap(arr, size, k, j);
+            j = iterate_right_marker(arr, size, cmp, j, pivot_val, i);
+        }
     }
+    segment_reorder(arr, size, cmp, left, left_of_pivot_max);
+    segment_reorder(arr, size, cmp, right, right_of_pivot_min);
 }
 
 static Index iterate_left_marker(void* arr, size_t size, CMP_PROTOTYPE(cmp),
         Index left, Value pivot_val, Index limit)
 {
 #define VALUE(INDEX) ((char*)(arr) + (INDEX)*(size))
-    while (left < limit && cmp(VALUE(left), pivot_val) < 0)
+    while (left <= limit && cmp(VALUE(left), pivot_val) < 0)
         ++left;
     return left;
+}
+
+static Index iterate_right_marker(void* arr, size_t size, CMP_PROTOTYPE(cmp),
+        Index right, Value pivot_val, Index limit)
+{
+#define VALUE(INDEX) ((char*)(arr) + (INDEX)*(size))
+    while (right >= limit && cmp(VALUE(right), pivot_val) > 0)
+        --right;
+    return right;
 }
 
 static void swap(void* arr, size_t size, Index first, Index second)
@@ -82,13 +97,13 @@ static Index greater_of(void* arr, size_t size, CMP_PROTOTYPE(cmp), Index first,
             Index second);
 
 /* Returns index of median of the left, right, and middle values of the array */
-static Index choose_pivot(void* arr, size_t length, size_t size,
+static Index choose_pivot(void* arr, size_t size, Index left, Index right,
         CMP_PROTOTYPE(cmp))
 {
-    if (lesser_of(arr, size, cmp, 0, length - 1) == 0)
-        return (greater_of(arr, size, cmp, 0, length/2));
+    if (lesser_of(arr, size, cmp, left, right) == 0)
+        return (greater_of(arr, size, cmp, left, left + (right - left) / 2));
     else
-        return (greater_of(arr, size, cmp, length/2, length));
+        return (greater_of(arr, size, cmp, left + (right - left) / 2, right));
 }
 
 /*

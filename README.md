@@ -7,8 +7,7 @@ Learn about:
 * Red + Black Trees (never learned in data structures)
 * Test-driven development
 
-Do some more Project Euler and actually put my solutions here instead of
-deleting them
+Do some more Project Euler
 
 The following are from http://redd.it/1a17tq
 * Text-based adventure [Key topics: basic i/o, basic code structure]

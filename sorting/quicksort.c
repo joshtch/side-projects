@@ -1,8 +1,11 @@
+/* Note: this implementation is attempting to be as fast I can make it, meaning
+ * readability may suffer somewhat
+ */
 #include "quicksort.h"
 
 typedef size_t Index;
 typedef void* Value;
-#define CMP_PROTOTYPE(NAME) int (*NAME)(const void*, const void*)
+#define CMP_PROTOTYPE(NAME) int (*(NAME))(const void*, const void*)
 
 static void private_qsort(void* arr, size_t size, CMP_PROTOTYPE(cmp),
             Index left, Index right);
@@ -34,29 +37,34 @@ static void private_qsort(void* arr, size_t size, CMP_PROTOTYPE(cmp),
     Index j = right;
     Index k, left_of_pivot_max, right_of_pivot_min;
     int comparison;
+
     Index pivot = choose_pivot(arr, size, left, right, cmp);
     Value pivot_val = VALUE(pivot);
 
-    i = iterate_left_marker(arr, size, cmp, i, pivot_val, j);
+    i = iterate_left_marker (arr, size, cmp, i, pivot_val, j);
     j = iterate_right_marker(arr, size, cmp, j, pivot_val, i);
     k = i;
+
+    left_of_pivot_max  = (i != left)  ? (i - 1) : left;
+    right_of_pivot_min = (j != right) ? (j + 1) : right;
+
     while (i < j) {
-        left_of_pivot_max = i;
-        right_of_pivot_min = j;
-        while ((comparison = cmp(VALUE(k), pivot_val)) == 0 && k != j) {
-            ++k;
-        }
-        if (k == j) break;
+        while ((comparison = cmp(VALUE(k), pivot_val)) == 0 && k < j) ++k;
+        if (k >= j) break;
+
         if (comparison < 0) {
             swap(arr, size, k, i);
             i = iterate_left_marker(arr, size, cmp, i, pivot_val, j);
+            left_of_pivot_max = i - 1;
         } else if (comparison > 0) {
             swap(arr, size, k, j);
             j = iterate_right_marker(arr, size, cmp, j, pivot_val, i);
+            right_of_pivot_min = j + 1;
         }
     }
     private_qsort(arr, size, cmp, left, left_of_pivot_max);
     private_qsort(arr, size, cmp, right, right_of_pivot_min);
+#undef VALUE
 }
 
 static Index iterate_left_marker(void* arr, size_t size, CMP_PROTOTYPE(cmp),
@@ -66,6 +74,7 @@ static Index iterate_left_marker(void* arr, size_t size, CMP_PROTOTYPE(cmp),
     while (left <= limit && cmp(VALUE(left), pivot_val) < 0)
         ++left;
     return left;
+#undef VALUE
 }
 
 static Index iterate_right_marker(void* arr, size_t size, CMP_PROTOTYPE(cmp),
@@ -75,6 +84,7 @@ static Index iterate_right_marker(void* arr, size_t size, CMP_PROTOTYPE(cmp),
     while (right >= limit && cmp(VALUE(right), pivot_val) > 0)
         --right;
     return right;
+#undef VALUE
 }
 
 static void swap(void* arr, size_t size, Index first, Index second)
@@ -108,11 +118,12 @@ static Index choose_pivot(void* arr, size_t size, Index left, Index right,
 
 /*
  * The following two functions could be combined into a single macro, but this
- * method is more readable and much safer
+ * way is more readable and much safer than adding more macros to the global
+ * namespace
  */
 
-static Index lesser_of(void* arr, size_t size, CMP_PROTOTYPE(cmp), Index first,
-        Index second)
+static inline Index lesser_of(void* arr, size_t size, CMP_PROTOTYPE(cmp),
+            Index first, Index second)
 {
     char* a = arr;
     void* first_byte_index  = a + first*size;
@@ -122,8 +133,8 @@ static Index lesser_of(void* arr, size_t size, CMP_PROTOTYPE(cmp), Index first,
     else
         return second;
 }
-static Index greater_of(void* arr, size_t size, CMP_PROTOTYPE(cmp), Index first,
-            Index second)
+static inline Index greater_of(void* arr, size_t size, CMP_PROTOTYPE(cmp),
+            Index first, Index second)
 {
     char* a = arr;
     void* first_byte_index  = a + first*size;

@@ -139,7 +139,6 @@ void solve(FILE *fp)
             }
         }
     }
-    printf("\n");
     print(stdout, m);
 }
 

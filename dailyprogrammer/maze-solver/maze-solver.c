@@ -168,3 +168,5 @@ char *get(Maze m, size_t x, size_t y)
         return &m.state[x + y * m.width];
 }
 
+#undef true
+#undef false

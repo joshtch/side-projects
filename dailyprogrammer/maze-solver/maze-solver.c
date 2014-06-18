@@ -1,14 +1,16 @@
-/* ASCII maze solver
+/* Extremely optimized ASCII maze solver
  * Finds all valid paths from start to finish
  * /r/dailyprogrammer challenge 165
  * http://redd.it/278ptv
+ * TODO: Show only the shortest path?
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define true ~0
+/* Note: These should not be used for boolean comparisons! */
+#define true  1
 #define false 0
 
 const char WALL       = '#';
@@ -33,7 +35,7 @@ void solve(FILE *fp);
 int main(int argc, char* argv[])
 {
     FILE *fp = filePointer(argc, argv);
-    if (fp == NULL) return 1;
+    if (fp == NULL) return EXIT_FAILURE;
     solve(fp);
     fclose(fp);
     return EXIT_SUCCESS;

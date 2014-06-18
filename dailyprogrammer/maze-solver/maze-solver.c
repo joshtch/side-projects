@@ -118,19 +118,24 @@ int deadEnd(Maze m, size_t x, size_t y)
     }
 }
 
+static void fillDeadEnd(Maze m, size_t x, size_t y)
+{
+    int i;
+    *get(m, x, y) = EMPTY;
+    for (i = -1; i <= 1; i += 2) {
+        if (deadEnd(m, x + i, y    )) fillDeadEnd(m, x + i, y    );
+        if (deadEnd(m, x    , y + i)) fillDeadEnd(m, x    , y + i);
+    }
+}
+
 void solve(FILE *fp)
 {
     Maze m = init(fp);
-    size_t i, j, width = m.width, height = m.height, done = false;
-    print(stdout, m);
-    while (!done) {
-        done = true;
-        for (j = 0; j < height; ++j) {
-            for (i = 0; i < width; ++i) {
-                if (deadEnd(m, i, j)) {
-                    *get(m, i, j) = EMPTY;
-                    done = false;
-                }
+    size_t i, j, width = m.width, height = m.height;
+    for (j = 0; j < height; ++j) {
+        for (i = 0; i < width; ++i) {
+            if (deadEnd(m, i, j)) {
+                fillDeadEnd(m, i, j);
             }
         }
     }

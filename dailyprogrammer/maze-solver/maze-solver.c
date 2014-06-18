@@ -45,9 +45,14 @@ int main(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
+int equal_cstrings(char *s1, char *s2)
+{
+    return strcmp(s1, s2) == 0;
+}
+
 FILE *filePointer(int argc, char* argv[])
 {
-    if (argc == 1 || (argc == 2 && !strncmp(argv[1], "-", 2)))
+    if (argc == 1 || (argc == 2 && equal_cstrings(argv[1], "-")))
         return stdin;
 
     else if (argc == 2)

@@ -96,8 +96,9 @@ void print(FILE* out, Maze m)
 int deadEnd(Maze m, size_t x, size_t y)
 {
     size_t i, numDeadNeighbors = 0;
-    if (*get(m, x, y) == SOLVE_PATH) {
+    char *elem = get(m, x, y);
 
+    if (elem != NULL && *elem == SOLVE_PATH) {
         char *neighbors[] = {
             get(m, x - 1, y),
             get(m, x + 1, y),

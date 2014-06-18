@@ -13,11 +13,15 @@
 #define true  1
 #define false 0
 
-const char WALL       = '#';
-const char START      = 'S';
-const char END        = 'E';
-const char EMPTY      = ' ';
-const char SOLVE_PATH = '*';
+/* There's a special place in hell for people who abuse enums like this in
+ * production code. */
+enum {
+    WALL       = '#',
+    START      = 'S',
+    END        = 'E',
+    EMPTY      = ' ',
+    SOLVE_PATH = '*'
+};
 
 FILE *filePointer(int argc, char* argv[]);
 

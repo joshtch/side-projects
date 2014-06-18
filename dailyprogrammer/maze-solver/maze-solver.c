@@ -65,21 +65,32 @@ FILE *filePointer(int argc, char* argv[])
 void print(FILE* out, Maze m)
 {
     size_t i, j;
-    const char pathColorCode[] = "\x1B[31m";
-    const char wallColorCode[] = "\x1B[34m";
-    const char resetCode[] = "\x1B[0m";
+    const char pathColorCode[]  = "\x1B[31m";
+    const char wallColorCode[]  = "\x1B[36m";
+    const char otherColorCode[] = "\x1B[33m";
+    const char resetCode[]      = "\x1B[0m";
+    const int addColor = 0;
+    char next;
+
     for (j = 0; j < m.height; ++j) {
         for (i = 0; i < m.width; ++i) {
-            if (*get(m, i, j) == SOLVE_PATH)
-                fprintf(out, "%s%c", pathColorCode, *get(m, i, j));
-            else if (*get(m, i, j) == WALL)
-                fprintf(out, "%s%c", wallColorCode, *get(m, i, j));
-            else
-                fprintf(out, "%s%c", resetCode, *get(m, i, j));
+            next = *get(m, i, j);
+            if (addColor) {
+                if (next == SOLVE_PATH)
+                    fprintf(out, "%s", pathColorCode);
+
+                else if (next == WALL)
+                    fprintf(out, "%s", wallColorCode);
+
+                else
+                    fprintf(out, "%s", otherColorCode);
+            }
+            fprintf(out, "%c", next);
         }
         fprintf(out, "\n");
     }
-    fprintf(out, resetCode);
+
+    if (addColor) fprintf(out, resetCode);
 }
 
 int deadEnd(Maze m, size_t x, size_t y)
